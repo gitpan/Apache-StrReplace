@@ -81,11 +81,13 @@ Apache httpd.conf
 =head1 DESCRIPTION
 
 StrReplaceSearch ... search strings.
+
 StrReplaceReplace ... replace strings.
-StrReplaceOption ... replace options. ( default "g" )
+
+StrReplaceOption ... regexp options. ( default "g" )
 
 run code.
-    eval qq{ $string=~s/$search/$replace/$option; };
+    eval '$f->ctx->{body}=~s/$search/'."$replace/$option;";
 
 =head1 EXAMPLE
 
