@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use vars qw(@ISA);
 
-$Apache::StrReplace::VERSION = '0.01';
+$Apache::StrReplace::VERSION = '0.02';
 
 BEGIN {
 
@@ -32,7 +32,13 @@ use constant BUFF_LEN => 1024;
 sub handler {
   my $f = shift;
 
-  unless ($f->r->content_type =~/text\/html/) {
+  my $search  = $f->r->dir_config('StrReplaceSearch');
+  my $replace = $f->r->dir_config('StrReplaceReplace');
+  my $ctype   = $f->r->dir_config('StrReplaceContentType') || 'text/html';
+  my $option  = $f->r->dir_config('StrReplaceOption') || 'g';
+  $option = 'g' if $option!~/^[egimosx]+$/;
+
+  unless ($f->r->content_type =~/$ctype/) {
     return DECLINED(); 
   }
 
@@ -47,10 +53,6 @@ sub handler {
   unless ($f->seen_eos) {
     return OK();
   }
-
-  my $search  = $f->r->dir_config('StrReplaceSearch');
-  my $replace = $f->r->dir_config('StrReplaceReplace');
-  my $option  = $f->r->dir_config('StrReplaceOption') || 'g';
 
   eval '$f->ctx->{body}=~s/$search/'."$replace/$option;";
 
@@ -86,8 +88,13 @@ StrReplaceReplace ... replace strings.
 
 StrReplaceOption ... regexp options. ( default "g" )
 
-run code.
-    eval '$f->ctx->{body}=~s/$search/'."$replace/$option;";
+StrReplaceContentType ... target Content-Type ( default "text/html" )
+
+run code image.
+
+    if ($f->r->content_type~/$contentType/) {
+        eval '$f->ctx->{body}=~s/$search/'."$replace/$option;";
+    }
 
 =head1 EXAMPLE
 
@@ -111,6 +118,15 @@ Perl code.
     PerlSetVar StrReplaceSearch "<taxes>(\d+)</taxes>"
     PerlSetVar StrReplaceReplace "int( $1 * 1.05 )"
     PerlSetVar StrReplaceOption "eg"
+    PerlOutputFilterHandler Apache::StrReplace
+
+text/plain support.
+
+    PerlModule Apache::StrReplace
+    PerlSetVar StrReplaceSearch "<taxes>(\d+)</taxes>"
+    PerlSetVar StrReplaceReplace "int( $1 * 1.05 )"
+    PerlSetVar StrReplaceOption "eg"
+    PerlSetVar StrReplaceContentType "text/(html|plain)"
     PerlOutputFilterHandler Apache::StrReplace
 
 =head1 SEE ALSO
