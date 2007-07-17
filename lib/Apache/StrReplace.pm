@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use vars qw(@ISA);
 
-$Apache::StrReplace::VERSION = '0.02';
+$Apache::StrReplace::VERSION = '0.03';
 
 BEGIN {
 
@@ -16,7 +16,7 @@ BEGIN {
     require Apache2::RequestRec;
     require Apache2::RequestUtil;
     Apache2::Const->import(qw(OK DECLINED));
-  } else {
+  } elsif ( exists $ENV{'MOD_PERL'} ) {
     require Apache::Filter;
     push @ISA, 'Apache::Filter';
     require Apache::Response;
@@ -135,7 +135,7 @@ L<Apache2>, L<Apache2::Filter>
 
 =head1 AUTHOR
 
-Shinichiro Aska, E<lt>cpan@aska-tech.jpE<gt>
+Shinichiro Aska, E<lt>askadna@cpan.orgE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
